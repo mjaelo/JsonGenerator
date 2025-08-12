@@ -1,0 +1,40 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            // The main repository for MinecraftForge.
+            name = "Forge"
+            url = "https://maven.minecraftforge.net/"
+        }
+        maven {
+            // The repository for the CurseForge mods.
+            name = "CurseForge"
+            url = "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        mavenCentral()
+    }
+}
+
+// Add the dependency resolution management block for subprojects.
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "Forge"
+            url = "https://maven.minecraftforge.net/"
+        }
+        maven {
+            name = "CurseForge"
+            url = "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+    }
+}
+
+// The root project name.
+rootProject.name = 'jsongenerator'

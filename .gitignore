@@ -1,0 +1,59 @@
+# IDE and Editor Files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.launch
+.settings/
+.project
+.classpath
+bin/
+out/
+
+# Build Directories
+build/
+.gradle/
+
+# Run Directories
+run/
+run-data/
+run-data/logs/
+run/logs/
+logs/
+
+# Local Configuration
+config/*.toml
+!config/defaultconfigs/
+
+# Generated Resources
+src/generated/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# KubeJS
+deploy_*.sh
+kubejs/
+
+# Crash Reports
+crash-reports/
+
+# Local Development
+local/
+*.local
+eclipse
+run
+
+# Files from Forge MDK
+forge*changelog.txt
+/run-data/logs/

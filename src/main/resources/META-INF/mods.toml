@@ -1,0 +1,57 @@
+# The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
+modLoader="javafml" #mandatory
+# A version range to match for said mod loader - for regular FML @Mod it will be the forge version
+loaderVersion="${loader_version_range}" #mandatory This is typically bumped every Minecraft version by Forge.
+
+# The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
+license="${mod_license}" #mandatory
+
+# A URL to refer people to when problems occur with this mod
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+# If your mod is purely client-side and has no multiplayer functionality (be be dedicated servers or Open to LAN),
+# set this to true, and Forge will set the correct displayTest for you and skip loading your mod on dedicated servers.
+#clientSideOnly=true #optional - defaults to false if absent
+
+# This is the main section for your mod itself
+[[mods]] #mandatory
+modId="${mod_id}" # The modid of your mod, as defined in build.gradle
+version="${mod_version}" # The version of your mod
+displayName="${mod_name}" # The name of your mod as displayed in Minecraft
+# A URL to query for updates for this mod. See the JSON update specification https://docs.minecraftforge.net/en/latest/misc/updatechecker/
+#updateJSONURL="https://change.me.example.invalid/updates.json" #optional
+# A URL for the "homepage" for this mod, displayed in the mod UI
+logoFile="examplemod.png" # A file path to a logo for display
+#credits="" #optional
+authors="${mod_authors}" # The authors of your mod
+#displayTest="MATCH_VERSION" # if nothing is specified, MATCH_VERSION is the default when clientSideOnly=false, otherwise IGNORE_ALL_VERSION when clientSideOnly=true (#optional)
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''${mod_description}''' # This description is now correctly placed within the [[mods]] block.
+
+# This section defines the dependencies your mod has on other mods.
+# The modid here should be the same as your modId (from above)
+
+# Dependency on Forge
+[[dependencies.${mod_id}]]
+modId="forge" #mandatory
+mandatory=true # Does this dependency have to exist
+versionRange="${loader_version_range}" # This is correct: using loader_version_range for Forge dependency
+ordering="NONE" # An ordering relationship - BEFORE or AFTER required if the relationship is not mandatory
+side="BOTH" # Side this dependency is applied on - BOTH, CLIENT or SERVER
+
+# Dependency on Minecraft
+[[dependencies.${mod_id}]]
+modId="minecraft" #mandatory
+mandatory=true
+# This version range declares a minimum of the current minecraft version up to but not including the next major version
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+# Dependency on JEI - JEI Discovery requires JEI to be present on both client and server
+[[dependencies.${mod_id}]]
+modId="jei"
+mandatory=true # Your mod requires JEI to function
+versionRange="[15.20.0.101,)" # This should match the JEI version from your build.gradle. The comma means "and newer".
+ordering="AFTER" # It's good practice for your mod to load AFTER JEI if you're interacting with its API
+side="BOTH" # This is correct: JEI needs to be present on both sides for dev environment
