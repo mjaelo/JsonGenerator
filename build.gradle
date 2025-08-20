@@ -64,6 +64,10 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     // Mod dependencies
     implementation fg.deobf("curse.maven:jei-238222:6600311")
+
+    implementation fg.deobf("curse.maven:sculk-horde-501766:6893408")
+    implementation fg.deobf("curse.maven:geckolib-388172:6789487")
+
 }
 
 tasks.named('processResources', ProcessResources).configure {

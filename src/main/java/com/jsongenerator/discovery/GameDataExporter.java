@@ -8,6 +8,7 @@ import com.jsongenerator.config.GroupConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
@@ -112,20 +113,153 @@ public class GameDataExporter {
             GroupConfig config = loadGroupConfig();
             
             if (config.getEntryCategories().contains(GroupConfig.EntryCategory.ITEMS)) {
-                exportEntries(config, "items", getItemEntries(), this::groupItemsByRarity);
+                exportItemsByNamespace(config);
             }
             
             if (config.getEntryCategories().contains(GroupConfig.EntryCategory.EFFECTS)) {
-                exportEntries(config, "effects", getEffectEntries(), this::groupEffectsByCategory);
+                exportEffectsByNamespace(config);
             }
             
             if (config.getEntryCategories().contains(GroupConfig.EntryCategory.BLOCKS)) {
-                exportEntries(config, "blocks", getBlockEntries(), null);
+                exportBlocksByNamespace(config);
             }
             
         } catch (IOException e) {
             LOGGER.error("Error during export", e);
         }
+    }
+    
+    private void exportItemsByNamespace(GroupConfig config) {
+        JsonObject root = new JsonObject();
+        
+        for (Item item : ForgeRegistries.ITEMS) {
+            ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+            if (id == null || config.getBlacklist().stream().anyMatch(id.toString()::contains)) {
+                continue;
+            }
+            
+            String namespace = id.getNamespace();
+            String path = id.getPath();
+            ItemStack stack = new ItemStack(item);
+            
+            // Get item category
+            String category = getItemCategory(stack);
+            if (category.isEmpty()) {
+                category = "Misc";
+            }
+            
+            // Get item tags
+            JsonArray tags = new JsonArray();
+            
+            // Add rarity
+            String rarity = stack.getRarity().name();
+            if (!rarity.equals("COMMON")) {
+                tags.add(rarity.substring(0, 1) + rarity.substring(1).toLowerCase());
+            }
+            
+            // Add custom group tags
+            for (Map.Entry<String, List<String>> group : config.getCustomGroups().entrySet()) {
+                if (group.getValue().stream().anyMatch(path::contains)) {
+                    tags.add(group.getKey());
+                }
+            }
+            
+            // Add to JSON structure
+            if (!root.has(namespace)) {
+                root.add(namespace, new JsonObject());
+            }
+            
+            JsonObject namespaceObj = root.getAsJsonObject(namespace);
+            if (!namespaceObj.has(category)) {
+                namespaceObj.add(category, new JsonObject());
+            }
+            
+            namespaceObj.getAsJsonObject(category).add(path, tags);
+        }
+        
+        saveToFile("items_by_namespace.json", root);
+    }
+    
+    private void exportEffectsByNamespace(GroupConfig config) {
+        JsonObject root = new JsonObject();
+        
+        for (MobEffect effect : ForgeRegistries.MOB_EFFECTS) {
+            ResourceLocation id = ForgeRegistries.MOB_EFFECTS.getKey(effect);
+            if (id == null || config.getBlacklist().stream().anyMatch(id.toString()::contains)) {
+                continue;
+            }
+            
+            String namespace = id.getNamespace();
+            String path = id.getPath();
+            
+            // Get effect category
+            String category = effect.getCategory().name();
+            
+            // Get effect tags
+            JsonArray tags = new JsonArray();
+            
+            // Add custom group tags
+            for (Map.Entry<String, List<String>> group : config.getCustomGroups().entrySet()) {
+                if (group.getValue().stream().anyMatch(path::contains)) {
+                    tags.add(group.getKey());
+                }
+            }
+            
+            // Add to JSON structure
+            if (!root.has(namespace)) {
+                root.add(namespace, new JsonObject());
+            }
+            
+            JsonObject namespaceObj = root.getAsJsonObject(namespace);
+            if (!namespaceObj.has(category)) {
+                namespaceObj.add(category, new JsonObject());
+            }
+            
+            namespaceObj.getAsJsonObject(category).add(path, tags);
+        }
+        
+        saveToFile("effects_by_namespace.json", root);
+    }
+    
+    private void exportBlocksByNamespace(GroupConfig config) {
+        JsonObject root = new JsonObject();
+        
+        for (Block block : ForgeRegistries.BLOCKS) {
+            ResourceLocation id = ForgeRegistries.BLOCKS.getKey(block);
+            if (id == null || config.getBlacklist().stream().anyMatch(id.toString()::contains)) {
+                continue;
+            }
+            
+            String namespace = id.getNamespace();
+            String path = id.getPath();
+            
+            // Get block category
+            String category = "Blocks";
+            
+            // Get block tags
+            JsonArray tags = new JsonArray();
+            
+            // Add custom group tags
+            for (Map.Entry<String, List<String>> group : config.getCustomGroups().entrySet()) {
+                if (group.getValue().stream().anyMatch(path::contains)) {
+                    tags.add(group.getKey());
+                }
+            }
+            
+            // Add to JSON structure
+            if (!root.has(namespace)) {
+                root.add(namespace, new JsonObject());
+            }
+            
+            JsonObject namespaceObj = root.getAsJsonObject(namespace);
+            if (!namespaceObj.has(category)) {
+                namespaceObj.add(category, new JsonObject());
+            }
+            
+            namespaceObj.getAsJsonObject(category).add(path, tags);
+        }
+        
+        saveToFile("blocks_by_namespace.json", root);
     }
     
     private Map<String, List<String>> groupItemsByRarity(List<String> itemIds) {
