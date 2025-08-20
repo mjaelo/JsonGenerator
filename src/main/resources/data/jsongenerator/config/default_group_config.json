@@ -1,0 +1,9 @@
+{
+    "entryCategories": ["ITEMS", "BLOCKS", "EFFECTS"],
+    "blacklist": ["minecraft:air","fishing_rod","book","potion","helmet","armor","chest","leggings","boots","sword","bow","axe","shovel","_hoe","shield","ingot","arrow","stick","egg","minecart","rail","music_disc","bucket","banner","boat","template","pottery"],
+    "CustomGroups": {
+        "Nether": ["nether", "quartz", "blaze", "wither_", "ghast", "crimson", "warped"],
+        "End": ["ender", "chorus", "shulker", "end_", "elytra", "dragon","purpur"],
+        "Sculk": ["sculk", "warden", "echo"]
+    }
+}

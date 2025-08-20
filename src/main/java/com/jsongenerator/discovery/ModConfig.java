@@ -11,14 +11,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ModConfig {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("json-generator/config.json");
-    public static final String DEFAULT_CONFIG_PATH = "/data/jsongenerator/config/default_config.json";
+    public static final String DEFAULT_CONFIG_PATH = "/data/jsongenerator/config/default_group_config.json";
 
     private static ModConfig INSTANCE;
     private final Set<String> discoveredGroupNames = new HashSet<>();
@@ -99,33 +101,9 @@ public class ModConfig {
             LOGGER.error("Failed to create default config", e);
         }
     }
-    
-    public void saveConfig() {
-        try {
-            var config = Map.of(
-                "discovered_item_groups", new ArrayList<>(discoveredGroupNames),
-                "item_groups", itemGroups.stream()
-                    .map(group -> {
-                        var map = new LinkedHashMap<String, Object>();
-                        map.put("groupType", group.groupType().name());
-                        map.put("category", group.category());
-                        map.put("keywords", group.keywords());
-                        return map;
-                    })
-                    .collect(Collectors.toList())
-            );
-            
-            Files.writeString(CONFIG_PATH, GSON.toJson(config));
-        } catch (Exception e) {
-            LOGGER.error("Failed to save config", e);
-        }
-    }
 
     public List<ItemGroup> getItemGroups() {
         return itemGroups;
     }
 
-    public Set<String> getDiscoveredGroupNames() {
-        return discoveredGroupNames;
-    }
 }
