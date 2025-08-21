@@ -1,6 +1,6 @@
 package com.jsongenerator;
 
-import com.jsongenerator.discovery.GameDataExporter;
+import com.jsongenerator.grouping.GameDataExporter;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
