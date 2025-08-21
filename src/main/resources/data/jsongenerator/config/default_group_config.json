@@ -1,24 +1,24 @@
 {
     "entryTypes": ["ITEMS", "EFFECTS"],
-    "blacklist": ["minecraft:air","trident","shears","fishing_rod","book","potion","helmet","armor","chest","leggings","boots","sword","bow","axe","shovel","_hoe","shield","ingot","arrow","stick","egg","minecart","rail","music_disc","bucket","banner","boat","template","pottery"],
+    "blacklist": ["minecraft:air","compass","clock","saddle","_raft","painting","trident","shears","fishing_rod","book","potion","helmet","armor","chest","leggings","boots","sword","bow","axe","shovel","_hoe","shield","ingot","arrow","stick","egg","minecart","hopper","rail","music_disc","bucket","banner","boat","template","pottery"],
     "CustomGroups": {
-        "Fire": ["fire", "coal", "blaze", "glowstone", "lava", "magma","burn","sand","nether", "quartz", "blaze", "ghast", "crimson","gun"],
-        "Ice": ["ice", "snow", "frost", "blizzard", "cold","winter","frozen"],
-        "Water": ["conduit","dolphin","water","wet","moist","sea","swamp","ocean","lake","fish","rain","dripping","mist","shell","aqua","salmon","kelp"],
-        "Earth": ["mining","earth","ground","cave","stone","deep","grass","flower","natur","leaf","wood","root","dirt","sand","clay","mud","pebble","moss","fertil"],
-        "Air": ["levitat","visible","air","wind","sky","cloud","fog","mist","haze","vapor","fly","wing","feather","bird","light","baloon","glide","purpur","end_", "shulker","elytra","eagle","phantom","vex","allay"],
+        "Fire": ["ash","flint","fire", "coal", "blaze", "blast", "glowstone", "lava", "magma","burn","sand","nether", "quartz", "ghast", "crimson","gun"],
+        "Ice": ["cold","lapis","ice", "snow", "frost", "blizzard", "cold","winter","frozen"],
+        "Water": ["prismarine","cod","conduit","dolphin","water","wet","moist","sea","swamp","ocean","lake","fish","rain","dripping","mist","shell","aqua","salmon","kelp"],
+        "Earth": ["brick","flint","mining","earth","ground","cave","stone","deep","grass","flower","natur","leaf","wood","root","dirt","sand","clay","mud","pebble","moss","fertil"],
+        "Air": ["chicked","breath","levitat","visible","air","wind","sky","cloud","fog","mist","haze","vapor","fly","wing","feather","bird","light","baloon","glide","purpur","end_", "shulker","elytra","eagle","phantom","vex","allay","jump","fall"],
 
-        "Poison": ["poison","rott","nausea","dirt","puffer","slime","shroom","lead","spider","venom","spore","mycelium","swamp","decay","zombie","flesh","infest"],
-        "Sweet": ["sweet","sugar","honey","bee","candy","lolly","caramel","fermented","syrup"],
-        "Dark": ["dark","night","obsidian","curse","evil","shadow","sneak","ink","soul","black","sculk", "warden", "echo","sneak","silent", "dragon", "wither_","bone","brood"],
-        "Light": ["gold","day","sun","bless","glow","good","heal","priest","soul","angel","white","glistering","allay","pure","puri","lumin","lightning"],
+        "Poison": ["toxi","poison","rott","nausea","dirt","puffer","slime","shroom","lead","spider","venom","spore","mycelium","swamp","decay","zombie","flesh","infest"],
+        "Sweet": ["lure","cookie","_pie","hung","pink","sweet","sugar","honey","bee","candy","lolly","caramel","fermented","syrup"],
+        "Dark": ["invis","bad_","unluck","blind","dark","night","obsidian","curse","evil","shadow","sneak","ink","soul","black","sculk", "warden", "echo","sneak","silent", "dragon", "wither","bone","brood"],
+        "Light": ["_foot","hero_","luck","gold","day","sun","bless","glow","good","heal","priest","soul","angel","white","glistering","allay","pure","puri","lumin","lightning"],
 
-        "Healthy": ["regen","heal","apple","steak","porkchop","wheat","honey","milk","mend","bandage","fertil"],
-        "Speed": ["rabbit","fast","speed","swift","haste","lightning","eagle"],
-        "Slow": ["slow","snail","slime","sludge","turtle","mud"],
-        "Protect": ["diamond","protect","iron","sturdy","tough","durab","resist","absorb","steel","obsidian","leather"],
-        "Delicate": ["delicate","weak","fragile","feebl","glass","crystal","ceramic","vulnerable","dainty","bamboo","crumbl"],
-        "Strong": ["strong","spik","strength","power","force","brute","sting","mighty"],
-        "Magic": ["levitat","silver","enchant","magic","lapis","obsidian","ancient","knowl","ender","magic","mystic","teleport","ender", "chorus", "warped","amethyst","blaze_","star","totem","phantom","vex"]
+        "Healthy": ["saturat","regen","heal","apple","steak","porkchop","wheat","honey","milk","mend","bandage","fertil"],
+        "Speed": ["rabbit","fast","speed","swift","haste","lightning","eagle","jump"],
+        "Slow": ["old_","tired","fatigue","grey","slow","snail","slime","sludge","turtle","mud","web","string"],
+        "Protect": ["diamond","protect","iron","sturdy","tough","durab","resist","absorp","steel","obsidian","leather","absorb"],
+        "Delicate": ["brush","paper","delicate","weak","fragile","feebl","glass","crystal","ceramic","vulnerable","dainty","bamboo","crumbl"],
+        "Strong": ["bleed","damag","hurt","shard","strong","spik","strength","power","force","brute","sting","mighty"],
+        "Magic": ["dragon","invis","levitat","silver","enchant","magic","lapis","obsidian","ancient","knowl","ender","magic","mystic","teleport","ender", "chorus", "warped","amethyst","blaze_","star","totem","phantom","vex"]
     }
 }

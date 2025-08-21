@@ -24,6 +24,7 @@ public class JsonGenerator {
         LOGGER.info("JSON Generator mod client setup");
         
         // Export game data when the client is fully loaded
-        event.enqueueWork(dataExporter::exportAll);
+        event.enqueueWork(dataExporter::groupAll);
     }
+
 }

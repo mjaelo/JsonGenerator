@@ -5,17 +5,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.jsongenerator.config.GroupConfig;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.item.*;
+import com.jsongenerator.data.EntryValue;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -27,11 +23,91 @@ public class GameDataExporter {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path OUTPUT_DIR = FMLPaths.GAMEDIR.get().resolve(MODID);
+    private static final Path OUTPUT_JSON_DIR = FMLPaths.GAMEDIR.get().resolve(MODID).resolve("json");
+
+    private final DataGrouper dataGrouper = new DataGrouper();
+    private final EffectAssigner effectAssigner = new EffectAssigner();
+
+    public void groupAll() {
+        try {
+            GroupConfig config = loadGroupConfig();
+            List<EntryValue> items = List.of();
+            List<EntryValue> effects = List.of();
+
+            if (config.getEntryTypes().contains(GroupConfig.EntryType.ITEMS)) {
+                JsonObject jsonItems = dataGrouper.GroupItemsByNamespace(config);
+                saveToFile("items_by_namespace.json", jsonItems);
+                items = dataGrouper.toEntryValues(jsonItems);
+            }
+
+            if (config.getEntryTypes().contains(GroupConfig.EntryType.EFFECTS)) {
+                JsonObject jsonEffects = dataGrouper.GroupEffectsByNamespace(config);
+                saveToFile("effects_by_namespace.json", jsonEffects);
+                effects = dataGrouper.toEntryValues(jsonEffects);
+            }
+
+            Map<String, Map<String, Float>> itemsWithEffects = effectAssigner.assignEffectsToItems(items, effects);
+            saveToFile("items_with_effects.json", GSON.toJsonTree(itemsWithEffects).getAsJsonObject());
+
+            saveFormattedJsons(itemsWithEffects);
+
+        } catch (IOException e) {
+            LOGGER.error("Error during export", e);
+        }
+    }
+
+    private void saveFormattedJsons(Map<String, Map<String, Float>> itemsWithEffects) {
+        try {
+            // Create the output directory if it doesn't exist
+            Files.createDirectories(OUTPUT_JSON_DIR);
+            
+            for (Map.Entry<String, Map<String, Float>> itemEntry : itemsWithEffects.entrySet()) {
+                try {
+                    String itemId = itemEntry.getKey();
+                    String[] itemParts = itemId.split(":");
+                    if (itemParts.length != 2) continue; // Skip invalid item IDs
+                    
+                    String itemNamespace = itemParts[0];
+                    String itemName = itemParts[1];
+                    Map<String, Float> effects = itemEntry.getValue();
+                    
+                    // Create effects array
+                    JsonArray effectsArray = new JsonArray();
+                    for (Map.Entry<String, Float> effectEntry : effects.entrySet()) {
+                        String effectId = effectEntry.getKey();
+                        float strength = effectEntry.getValue();
+                        
+                        JsonObject effectObj = new JsonObject();
+                        effectObj.addProperty("effect", effectId);
+                        effectObj.addProperty("strength", strength);
+                        effectsArray.add(effectObj);
+                    }
+                    
+                    // Create the main item JSON
+                    JsonObject itemJson = new JsonObject();
+                    itemJson.addProperty("type", "mysticalchemy:potion_ingredient");
+                    itemJson.addProperty("item", itemId);
+                    itemJson.add("effects", effectsArray);
+                    
+                    // Create namespace directory if it doesn't exist
+                    Path namespaceDir = OUTPUT_JSON_DIR.resolve(itemNamespace);
+                    Files.createDirectories(namespaceDir);
+                    
+                    // Save to file in the namespace directory
+                    Path outputFile = namespaceDir.resolve(itemName + ".json");
+                    saveToFile(outputFile.toString(), itemJson);
+                    
+                } catch (Exception e) {
+                    LOGGER.error("Error processing item: " + itemEntry.getKey(), e);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error saving formatted JSON files", e);
+        }
+    }
 
     private GroupConfig loadGroupConfig() throws IOException {
         Path configPath = FMLPaths.CONFIGDIR.get().resolve("json-generator/group_config.json");
-
-        // Copy default config if it doesn't exist
         if (!Files.exists(configPath)) {
             Files.createDirectories(configPath.getParent());
             try (var in = getClass().getResourceAsStream("/data/jsongenerator/config/default_group_config.json")) {
@@ -43,142 +119,16 @@ public class GameDataExporter {
                 }
             }
         }
-
-        // Read the file content for debugging
-        String jsonContent = new String(Files.readAllBytes(configPath));
-        LOGGER.debug("Loading config from: " + configPath);
-        LOGGER.debug("Config content:\n" + jsonContent);
-
-        try (var reader = new StringReader(jsonContent)) {
-            GroupConfig config = GSON.fromJson(reader, GroupConfig.class);
-            if (config == null) {
-                throw new IOException("Failed to parse config: result is null");
-            }
-            return config;
+        try (var reader = Files.newBufferedReader(configPath)) {
+            return GSON.fromJson(reader, GroupConfig.class);
         } catch (Exception e) {
-            LOGGER.error("Error parsing config file at " + configPath, e);
             throw new IOException("Failed to parse config file: " + e.getMessage(), e);
         }
     }
 
-    public void exportAll() {
-        try {
-            GroupConfig config = loadGroupConfig();
-
-            if (config.getEntryTypes().contains(GroupConfig.EntryType.ITEMS)) {
-                exportItemsByNamespace(config);
-            }
-
-            if (config.getEntryTypes().contains(GroupConfig.EntryType.EFFECTS)) {
-                exportEffectsByNamespace(config);
-            }
-
-        } catch (IOException e) {
-            LOGGER.error("Error during export", e);
-        }
-    }
-
-    private void exportItemsByNamespace(GroupConfig config) {
-        JsonObject root = new JsonObject();
-
-        List<Item> items = ForgeRegistries.ITEMS.getEntries().stream()
-                .filter(entry -> config.getBlacklist().stream().noneMatch(entry.getKey().toString()::contains))
-                .filter(entry -> isItemTypeAllowed(entry.getValue()))
-                .map(Map.Entry::getValue)
-                .toList();
-
-        for (Item item : items) {
-            ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
-
-            String namespace = id.getNamespace();
-            String path = id.getPath();
-            ItemStack stack = new ItemStack(item);
-
-            // Get item tags
-            JsonArray tags = new JsonArray();
-
-            // Add rarity
-            String rarity = stack.getRarity().name();
-            if (!rarity.equals("COMMON")) {
-                tags.add(rarity.charAt(0) + rarity.substring(1).toLowerCase());
-            }
-
-            // Add custom group tags
-            for (Map.Entry<String, List<String>> group : config.getCustomGroups().entrySet()) {
-                if (group.getValue().stream().anyMatch(path::contains)) {
-                    tags.add(group.getKey());
-                }
-            }
-
-            // Add to JSON structure
-            if (!root.has(namespace)) {
-                root.add(namespace, new JsonObject());
-            }
-
-            JsonObject namespaceObj = root.getAsJsonObject(namespace);
-            if (!namespaceObj.has(path)) {
-                namespaceObj.add(path, tags);
-            }
-        }
-
-        saveToFile("items_by_namespace.json", root);
-    }
-
-    private static boolean isItemTypeAllowed(Item item) {
-        return !(
-                item instanceof BlockItem || item instanceof ArmorItem || item instanceof SwordItem || item instanceof PickaxeItem ||
-                item instanceof ProjectileWeaponItem || item instanceof ShovelItem || item instanceof AxeItem ||
-                item instanceof HoeItem
-        );
-    }
-
-    private void exportEffectsByNamespace(GroupConfig config) {
-        JsonObject root = new JsonObject();
-
-        for (MobEffect effect : ForgeRegistries.MOB_EFFECTS) {
-            ResourceLocation id = ForgeRegistries.MOB_EFFECTS.getKey(effect);
-            if (id == null || config.getBlacklist().stream().anyMatch(id.toString()::contains)) {
-                continue;
-            }
-
-            String namespace = id.getNamespace();
-            String path = id.getPath();
-
-            // Get effect tags
-            JsonArray tags = new JsonArray();
-
-            // Add category as a tag if not NEUTRAL
-            String category = effect.getCategory().name();
-            if (!category.equals("NEUTRAL")) {
-                tags.add(category);
-            }
-
-            // Add custom group tags
-            for (Map.Entry<String, List<String>> group : config.getCustomGroups().entrySet()) {
-                if (group.getValue().stream().anyMatch(path::contains)) {
-                    tags.add(group.getKey());
-                }
-            }
-
-            // Add to JSON structure
-            if (!root.has(namespace)) {
-                root.add(namespace, new JsonObject());
-            }
-
-            JsonObject namespaceObj = root.getAsJsonObject(namespace);
-
-            // Use a single "Items" category for all items
-            namespaceObj.add(path, tags);
-        }
-
-        saveToFile("effects_by_namespace.json", root);
-    }
-
     private void saveToFile(String filename, JsonObject data) {
         try {
-            // Create parent directories if they don't exist
             Files.createDirectories(OUTPUT_DIR);
-
             Path outputFile = OUTPUT_DIR.resolve(filename);
             try (FileWriter writer = new FileWriter(outputFile.toFile())) {
                 GSON.toJson(data, writer);
@@ -188,4 +138,5 @@ public class GameDataExporter {
             LOGGER.error("Failed to save data to {}: {}", OUTPUT_DIR.resolve(filename), e.getMessage(), e);
         }
     }
+
 }
